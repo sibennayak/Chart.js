@@ -168,6 +168,15 @@ module.exports = function(Chart) {
 			me.unitScale = 1; // How much we scale the unit by, ie 2 means 2x unit per step
 			me.scaleSizeInUnits = 0; // How large the scale is in the base unit (seconds, minutes, etc)
 
+			// Only round the last tick if we have no hard maximum
+			if (!me.options.time.max) {
+				var roundedEnd = me.getMomentStartOf(me.lastTick);
+				if (roundedEnd.diff(me.lastTick, me.tickUnit, true) !== 0) {
+					// Do not use end of because we need me to be in the next time unit
+					me.lastTick = me.getMomentStartOf(me.lastTick.add(1, me.tickUnit));
+				}
+			}
+
 			// Set unit override if applicable
 			if (me.options.time.unit) {
 				me.tickUnit = me.options.time.unit || 'day';
@@ -235,15 +244,6 @@ module.exports = function(Chart) {
 				roundedStart = me.firstTick;
 			} else {
 				roundedStart = me.getMomentStartOf(me.firstTick);
-			}
-
-			// Only round the last tick if we have no hard maximum
-			if (!me.options.time.max) {
-				var roundedEnd = me.getMomentStartOf(me.lastTick);
-				if (roundedEnd.diff(me.lastTick, me.tickUnit, true) !== 0) {
-					// Do not use end of because we need me to be in the next time unit
-					me.lastTick = me.getMomentStartOf(me.lastTick.add(1, me.tickUnit));
-				}
 			}
 
 			me.smallestLabelSeparation = me.width;
